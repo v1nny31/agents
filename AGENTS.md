@@ -32,6 +32,8 @@ This file gives any AI coding agent (Claude Code, Codex, Cursor, Copilot, Gemini
 
 The agent should always use the project's actual scripts (e.g. from `package.json`, `Makefile`, `pyproject.toml`) rather than guessing generic commands.
 
+If a command isn't defined yet (no test suite, linter, or CI), write "none" in its cell instead of filling in a framework default (e.g. PHPUnit/Pest/Pint, Jest, pytest), and add the real command once it exists.
+
 ---
 
 ## 3. General Coding Norms
@@ -109,6 +111,8 @@ The agent should always use the project's actual scripts (e.g. from `package.jso
 - **Don't merge your own PR with failing CI**, if CI is configured.
 - **Keep PRs small and reviewable** where possible — prefer several small PRs over one giant one.
 - **The agent should not run `git push --force`, delete branches, rewrite shared history, or push to `main` without explicit confirmation from me first.**
+- **Fetch before assuming.** Run `git fetch` before assuming a branch does or doesn't exist — remote-tracking refs go stale between fetches.
+- **Sync before the PR.** Before opening a PR, merge (or rebase, per the project's convention) the latest target branch into your branch and resolve conflicts locally.
 
 ---
 
