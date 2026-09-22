@@ -123,7 +123,10 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 - **Plan multi-file changes first.** For a change spanning several files, announce a brief plan before writing anything: which files, what each one is responsible for, and how it will be validated. For an obvious local change, just proceed.
 - **Smallest coherent change.** Produce the smallest change that fully satisfies the request — minimal, targeted diffs rather than large rewrites unless a rewrite was explicitly requested. Don't add a dependency or a refactor that wasn't asked for; if one seems necessary, ask first.
 - **Stay in scope.** Before concluding, re-read the diff, remove any temporary scripts, files, and logs, and confirm no file outside the request was touched.
-- **Verify manually what tests can't prove.** For work that isn't fully covered by automated tests (e.g. UI/frontend interactions), manually exercise it — mouse/keyboard interaction, focus, messages, state after a full reload — rather than assuming the code is correct because it compiles.
+- **Verify manually what tests can't prove.** Automated tests passing is necessary, not sufficient — it does not mean the frontend/UI actually works. Treat it as one signal, not a conclusion.
+  - If the agent has real browser/UI tooling, exercise the change itself — mouse/keyboard interaction, focus, messages, state after a reload — and report exactly what it did and observed.
+  - If it doesn't, it does not get to claim the UI works. Instead, write the user a short, precise manual test script (exact steps, exact expected result) and explicitly ask them to run it and report back. The task isn't "done" until that confirmation comes back — don't say "everything works" on the user's behalf.
+  - Match the verification steps to what's actually being checked, not a generic default. In particular, a full reload can itself hide or fix the very thing being checked (e.g. state that should survive without a reload) — reload when the scenario calls for it, and deliberately don't when the behavior being verified depends on not reloading.
 - **Explain every decision and the reasoning behind it** — not just non-obvious changes. When presenting work, walk through: what was changed, why this approach was chosen over alternatives, what trade-offs it carries, and any assumptions made along the way. Don't just say "done" or hand over a diff with no explanation, but don't narrate details that have no consequence either.
 - Surface trade-offs when there are multiple reasonable approaches, and explain why one was picked over the others, instead of silently choosing one and not mentioning the alternatives.
 - When making a non-trivial design/architecture choice, state the reasoning in a code comment or the commit message as well, so the "why" survives outside the chat.
@@ -136,11 +139,21 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 - **Concision.** Be concise. For a multi-step task, give short progress notes at key moments: exploration, decision, difficulty, validation. Don't describe every read or command that has no consequence.
 - **Uncertainty.** Flag any uncertainty that could change the scope or the outcome.
 - **Final reply.** Start with the result, then the files modified, the validations actually run (command and result), and the remaining limitations.
-- **Honesty about checks.** Never present a check that wasn't run as passed. Distinguish "executed", "observed manually", and "only recommended". If a check fails and then passes, report both results.
+- **Honesty about checks.** Never present a check that wasn't run as passed. Distinguish four things: automated checks the agent actually executed, UI/manual checks the agent itself observed (only possible with real browser/UI tooling), UI/manual checks the agent asked the user to run, and checks that are only recommended but not yet done. A check the agent merely *asked* the user to try is "requested", not "passed", until they answer — don't upgrade it on their behalf. If a check fails and then passes, report both results.
 
 ---
 
-## 8. Project-Specific Overrides
+## 8. Hooks (optional)
+
+- If this project has an agent hook configured (for Claude Code: `.claude/settings.json` plus a script, typically under `.claude/hooks/`; other tools use their own equivalent), read that hook's own README/comments for the event it fires on, what it actually checks, and its retry/loop-guard behavior before assuming what it does or claiming it ran.
+- A hook that reruns tests only confirms the tests it targets. Never extend a hook's "pass" into a claim that the whole application works (section 7's verify-manually rule still applies on top of it).
+- A hook's failure or block is a real signal, not an obstacle to route around — fix the reported problem; don't disable, edit around, or silence a hook to get past it without asking first (same principle as section 4: never ignore a failing check silently).
+- Hooks are tool-specific: the event name and return format differ by tool, and a hook working in one tool doesn't imply it's wired up in another. If the project moves tools, re-verify the hook actually fires (both a passing and a failing case) rather than assuming the config ported over — running the hook's script by hand does not prove it's wired to the event.
+- This kit ships one ready-made example: `hooks/pre-turn-test-check/`, which reruns a configured test command before the agent's turn ends and reports precisely *why* it isn't passing (not implemented / dependency error / code error / real test failure) instead of ever turning a failure into a false success. See its own README for wiring instructions and known activation conditions per tool.
+
+---
+
+## 9. Project-Specific Overrides
 
 > Add anything below that overrides or extends the general rules above for this specific project (e.g. a stricter style guide, a monorepo's cross-package rules, a required commit template, deployment steps, etc.)
 

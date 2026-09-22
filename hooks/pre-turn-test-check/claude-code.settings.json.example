@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/pre-turn-test-check/check-tests.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}
