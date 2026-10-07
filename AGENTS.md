@@ -1,160 +1,425 @@
 # AGENTS.md
 
-This file gives any AI coding agent (Claude Code, Codex, Cursor, Copilot, Gemini CLI, Windsurf, Aider, Jules, Zed, etc.) standing instructions for this project. It's a general template — at the start of each new project, fill in the `[PROJECT-SPECIFIC]` sections below with the actual stack, commands, and structure. The agent should read this file first, and treat it as a baseline that can be extended (not overridden) by anything more specific said later in the conversation.
+This file is the repository's baseline operating guide for AI coding agents.
+
+`AGENTS.md` is guidance, not a security boundary or a guarantee of compliance. The agent must still verify its own work and obey higher-priority system, developer, and user instructions. Keep this file concrete, current, and focused on information an agent cannot reliably infer from the code alone.
+
+More specific instructions may exist in nested `AGENTS.md` files. For a file being changed, follow the applicable root and nested instructions; when they conflict, the more specific applicable instruction takes precedence unless a higher-priority instruction says otherwise.
 
 ---
 
-## 1. Project Overview
+## 0. Non-Negotiable Agent Rules
 
-> [PROJECT-SPECIFIC — fill in per project]
+These are the default behavioral constraints for every task.
 
-- **What this project is:**
-- **Tech stack:**
-- **Entry point(s):**
-- **Key directories:**
+1. **Do not guess when repository evidence is available.** Read the relevant code, configuration, tests, documentation, and package versions before relying on assumptions.
+2. **Do not fabricate.** Never invent file paths, APIs, commands, library features, test results, commit hashes, configuration options, or successful outcomes.
+3. **Do not make unrelated changes.** Solve the requested problem with the smallest coherent change.
+4. **Do not declare success without evidence.** A task is not complete until the relevant verification has actually been run or the remaining manual verification is explicitly reported.
+5. **Do not weaken safeguards to get a green result.** Never disable tests, security checks, type checks, linters, CI rules, hooks, or validation merely to make the task pass.
+6. **Protect user work.** Do not overwrite or discard unrelated local changes. Do not use destructive Git or filesystem operations unless they are explicitly required and authorized.
+7. **Follow the repository's existing conventions before introducing new ones.** Existing code, tests, configuration, and documentation are stronger evidence than personal preference.
+8. **Stop and clarify when ambiguity materially changes the implementation.** When ambiguity is minor, state a reasonable assumption and proceed.
 
 ---
 
-## 2. Commands
+## 1. Instruction Hierarchy & Scope
 
-> [PROJECT-SPECIFIC — fill in per project]
+### Priority
+
+When instructions conflict, use this general order:
+
+1. System/runtime safety constraints.
+2. Developer/tooling instructions from the agent environment.
+3. Direct user instructions.
+4. The most specific applicable `AGENTS.md` instructions.
+5. Broader/root `AGENTS.md` instructions.
+6. General repository documentation and inferred conventions.
+
+Never claim that `AGENTS.md` overrides a higher-priority instruction.
+
+### File scope
+
+An `AGENTS.md` file applies to its directory and descendants according to the agent/tool's supported discovery rules. In repositories that use nested instruction files, assume that local instructions extend the root rules and that more-specific instructions take precedence.
+
+Before modifying files in an unfamiliar subtree, check for applicable nested instruction files unless the current agent environment has already explicitly loaded them.
+
+### Keep instructions layered
+
+The root `AGENTS.md` should contain project-wide rules. Put subsystem-specific guidance in narrower instruction files when the project/harness supports them. Do not duplicate the same rule in many places unless necessary.
+
+---
+
+## 2. Project Overview
+
+Fill in the project-specific information below when creating a new project.
+
+- **What this project is:** `[PROJECT-SPECIFIC: 1–3 sentence description]`
+- **Main language(s):** `[PROJECT-SPECIFIC]`
+- **Tech stack:** `[PROJECT-SPECIFIC: frameworks, runtimes, major tools]`
+- **Entry points:** `[PROJECT-SPECIFIC]`
+- **Key directories:** `[PROJECT-SPECIFIC]`
+- **Architecture / important boundaries:** `[PROJECT-SPECIFIC]`
+- **Project language:** `[PROJECT-SPECIFIC: documentation / team communication language]`
+- **Supported environments:** `[PROJECT-SPECIFIC]`
+
+Do not fill these fields by guessing. Inspect the repository first.
+
+### Repository facts to verify
+
+Before making substantial changes, inspect the sources that define how the project actually works, as applicable:
+
+- `README.md` and relevant documentation
+- package/build manifests (`package.json`, `pyproject.toml`, `Cargo.toml`, `pom.xml`, `composer.json`, etc.)
+- lockfiles and runtime/version files
+- CI workflows
+- formatter/linter/type-check configuration
+- test configuration and representative tests
+- environment/configuration files
+- existing architecture or contribution documents
+
+---
+
+## 3. Commands
+
+Document the commands that are actually used by this project.
 
 | Task | Command |
-|---|---|
-| Install deps | |
-| Run dev server | |
-| Run tests | |
-| Run a single test | |
-| Lint | |
-| Format | |
-| Build | |
-| Type-check | |
+| --- | --- |
+| Install dependencies | `[PROJECT-SPECIFIC]` |
+| Run development server | `[PROJECT-SPECIFIC]` |
+| Run tests | `[PROJECT-SPECIFIC]` |
+| Run a single test | `[PROJECT-SPECIFIC]` |
+| Lint | `[PROJECT-SPECIFIC]` |
+| Format | `[PROJECT-SPECIFIC]` |
+| Type-check | `[PROJECT-SPECIFIC]` |
+| Build | `[PROJECT-SPECIFIC]` |
 
-The agent should always use the project's actual scripts (e.g. from `package.json`, `Makefile`, `pyproject.toml`) rather than guessing generic commands.
+Use the project's real scripts/configuration rather than generic commands. If commands vary by package or directory, document that explicitly.
 
-If a command isn't defined yet (no test suite, linter, or CI), write "none" in its cell instead of filling in a framework default (e.g. PHPUnit/Pest/Pint, Jest, pytest), and add the real command once it exists.
-
----
-
-## 3. General Coding Norms
-
-- **Simplicity first.** Prefer the straightforward solution over the clever one. Don't add abstraction, config, or flexibility that isn't needed yet.
-- **Match existing style.** Follow the conventions already in the codebase (naming, file layout, formatting) before applying personal/default preferences.
-- **Small, focused functions/modules.** A function should do one thing. If a function is doing three things, it's probably three functions.
-- **Separate concerns by layer.** Keep domain/business logic out of the UI/presentation layer — validation and business rules belong in models, services, or the backend, not in UI components. Keep domain logic, application logic (API/actions), and presentation (UI) as distinct layers.
-- **Naming matters.** Names should say what something is or does, not how it's implemented. No single-letter variables outside tight loops/math.
-- **No dead code.** Don't leave commented-out code, unused imports, unused variables, or TODOs without a linked issue/explanation.
-- **DRY, but not obsessively.** Extract shared logic once it's duplicated 3+ times or the duplication is a real maintenance risk — not on the first repetition.
-- **Comments explain *why*, not *what*.** The code should show what it does; comments are for intent, trade-offs, and non-obvious constraints.
-- **Keep docs in sync with interfaces.** When a change affects a documented public interface (API routes, exported functions, CLI commands, config options), update the relevant documentation in the same change rather than as a follow-up.
-- **No premature optimization.** Write clear code first. Optimize only when there's a measured, real bottleneck.
-- **Dependencies are a cost.** Don't add a library for something that's a few lines of code, and don't add a new dependency at all without asking first. If approved, justify it briefly when adding it.
-- **Keep functions/files a reasonable size.** If a file is sprawling past a few hundred lines or a function past ~40-50 lines, consider splitting it.
-- **Consistent formatting.** Run the project's formatter/linter before considering work done — don't hand-format.
-- **Respect the correct checkstyle for the language being used.** This includes, at minimum:
-  - Correct, consistent indentation and bracing style for that language (e.g. 4 spaces for Python/PEP8, 2 spaces for JS/TS per the project's config, gofmt/rustfmt output for Go/Rust, etc.) — use the language/project's standard formatter rather than a personal default.
-  - A doc comment/docstring for every function, method, and class (or at minimum every public/exported one) — describing purpose, parameters, return value, and any exceptions/errors raised.
-  - Following the language's idiomatic naming conventions (e.g. `snake_case` in Python, `camelCase` in JS/Java, `PascalCase` for classes/types).
-  - Conforming to the established style guide for that language/ecosystem (PEP8 for Python, Airbnb/Standard/ESLint config for JS/TS, `gofmt`/`golint` for Go, `rustfmt`/`clippy` for Rust, etc.), or the project's own linter config if one exists and takes precedence.
+When a command is important to the task, run the exact project command rather than an approximate substitute whenever practical.
 
 ---
 
-## 4. Error Handling & Checks
+## 4. Structured Workflow
 
-- **Fail loudly, not silently.** Never swallow exceptions/errors with an empty catch block. If an error is genuinely expected and handled, say so in a comment.
-- **Validate inputs at boundaries.** Check arguments/payloads at the edges of the system (API handlers, CLI entry points, public functions) rather than trusting callers everywhere.
-- **Handle the edge cases, explicitly:**
-  - Empty / null / undefined values
-  - Empty lists/arrays/collections
-  - Off-by-one and boundary conditions (0, 1, max, max+1)
-  - Network/IO failures and timeouts
-  - Concurrent access / race conditions, where relevant
-- **No bare `except:` / catch-all swallow.** Catch specific exceptions/errors; re-raise or log what you don't handle.
-- **Meaningful error messages.** Errors should say what failed and, where possible, what to do about it — not just "Error" or a raw stack trace with no context.
-- **Never ignore a failing test or a compiler/type warning** to make the build pass — fix the root cause or explicitly flag why it's being deferred.
-- **Before declaring a task done, the agent should:**
-  1. Run the relevant tests (or write new ones if none exist for the changed behavior).
-  2. Run the linter/type-checker if the project has one.
-  3. Actually read the diff once more for typos, leftover debug prints, and unused code.
-  4. Confirm the change doesn't silently break an unrelated part of the code (search for other call sites).
-  5. Remove temporary scripts, files, and logs, and confirm no file outside the request was modified.
-- **Don't guess about behavior.** If it's unclear how something should behave in an edge case, ask, or state the assumption explicitly in a comment/commit message rather than silently picking one.
+For anything beyond a trivial local edit, follow this workflow in order.
 
----
+### Phase 1 — Understand
 
-## 5. Testing
+1. Read this `AGENTS.md` and any more-specific applicable instructions.
+2. Read the user's request carefully and identify the actual desired outcome.
+3. Inspect the relevant files, their callers/consumers, related tests, and relevant configuration.
+4. Search for existing implementations or patterns before creating new ones.
+5. Identify the project's source of truth for the behavior being changed.
+6. Identify constraints, dependencies, affected interfaces, and likely edge cases.
 
-- The agent adds tests when explicitly asked to. When it does, or when it writes tests as part of a feature/fix, they must cover at least **90% coverage** of the code they target (line/branch coverage per the project's test-coverage tool). If the project already has a coverage tool/config, use it and report the resulting number; otherwise state clearly that coverage wasn't measured and why.
-- New features get at least a basic test covering the happy path and one failure/edge case, in addition to meeting the 90% coverage bar above.
-- Bug fixes should include a test that reproduces the bug before the fix, when practical.
-- Don't delete, weaken, or disable a test, and don't alter test data, just to make it pass — fix the underlying code, or explain clearly why the test's expectation was wrong.
-- **Write tests from the requirements, not from the implementation.** Compute expected values independently from the spec/domain rules; never derive them by running the function under test and pasting its output back as the expectation.
-- **Validate narrow first, then wide.** Run the targeted test (single file or test name) before the full suite; then run the full test suite plus lint/type checks.
-- If hitting 90% coverage isn't realistic for a given piece of code (e.g. trivial getters, unreachable defensive branches), say so explicitly rather than silently falling short or padding with low-value tests just to hit the number.
+Do not edit code during this phase.
 
----
+### Phase 2 — Plan
 
-## 6. Git Workflow
+For a non-trivial task, produce a concise implementation plan before making changes.
 
-- **Never commit or push directly to `main`/`master` (or any other protected/integration branch the project uses, e.g. `develop`, `staging`).** All changes go through a feature branch and a pull request, even for small changes.
-- **Branch naming:** `type/short-description`, e.g. `feat/user-auth`, `fix/login-crash`, `chore/update-deps`, `docs/readme-update`.
-- **One logical change per branch/PR.** Don't mix an unrelated refactor into a feature branch.
-- **Commit messages:**
-  - Short imperative summary line (≤ 72 chars), e.g. `Fix null pointer in session parser`.
-  - Optional body explaining *why*, not just what, if the change isn't self-evident.
-  - Follow [Conventional Commits](https://www.conventionalcommits.org/) style if the project already uses it (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`).
-- **Commit atomically.** Each commit should leave the codebase in a working state; don't bundle unrelated changes into one commit.
-- **Never commit secrets, API keys, `.env` files, or credentials.** Check `.gitignore` covers them before the first commit.
-- **No machine-specific data in the repo.** Never write secrets, credentials, or paths specific to one machine (e.g. an absolute `C:\Users\...` or `/home/<user>/...` path) into repository files. Use relative paths, environment variables, or placeholders.
-- **Pull before you push**, and rebase/merge cleanly rather than force-pushing over shared history (never force-push a shared/main branch).
-- **Open a PR for review before merging**, even solo — use the PR description to summarize what changed and why, and link any related issue.
-- **Don't merge your own PR with failing CI**, if CI is configured.
-- **Keep PRs small and reviewable** where possible — prefer several small PRs over one giant one.
-- **The agent should not run `git push --force`, delete branches, rewrite shared history, or push to `main` without explicit confirmation from me first.**
-- **Fetch before assuming.** Run `git fetch` before assuming a branch does or doesn't exist — remote-tracking refs go stale between fetches.
-- **Sync before the PR.** Before opening a PR, merge (or rebase, per the project's convention) the latest target branch into your branch and resolve conflicts locally.
+The plan should state:
 
----
+- what will change
+- which files or areas are likely to change
+- important implementation choices
+- how the result will be verified
 
-## 7. Agent Behavior Expectations
+Plans should be specific enough to review but short enough to remain useful.
 
-- Ask a clarifying question if a request is ambiguous enough that guessing wrong would mean redoing real work — otherwise, state the assumption and proceed.
-- **Read before proposing.** Read this file, then the files the task touches (rules, code, tests), before proposing any change.
-- **Plan multi-file changes first.** For a change spanning several files, announce a brief plan before writing anything: which files, what each one is responsible for, and how it will be validated. For an obvious local change, just proceed.
-- **Smallest coherent change.** Produce the smallest change that fully satisfies the request — minimal, targeted diffs rather than large rewrites unless a rewrite was explicitly requested. Don't add a dependency or a refactor that wasn't asked for; if one seems necessary, ask first.
-- **Stay in scope.** Before concluding, re-read the diff, remove any temporary scripts, files, and logs, and confirm no file outside the request was touched.
-- **Verify manually what tests can't prove.** Automated tests passing is necessary, not sufficient — it does not mean the frontend/UI actually works. Treat it as one signal, not a conclusion.
-  - If the agent has real browser/UI tooling, exercise the change itself — mouse/keyboard interaction, focus, messages, state after a reload — and report exactly what it did and observed.
-  - If it doesn't, it does not get to claim the UI works. Instead, write the user a short, precise manual test script (exact steps, exact expected result) and explicitly ask them to run it and report back. The task isn't "done" until that confirmation comes back — don't say "everything works" on the user's behalf.
-  - Match the verification steps to what's actually being checked, not a generic default. In particular, a full reload can itself hide or fix the very thing being checked (e.g. state that should survive without a reload) — reload when the scenario calls for it, and deliberately don't when the behavior being verified depends on not reloading.
-- **Explain every decision and the reasoning behind it** — not just non-obvious changes. When presenting work, walk through: what was changed, why this approach was chosen over alternatives, what trade-offs it carries, and any assumptions made along the way. Don't just say "done" or hand over a diff with no explanation, but don't narrate details that have no consequence either.
-- Surface trade-offs when there are multiple reasonable approaches, and explain why one was picked over the others, instead of silently choosing one and not mentioning the alternatives.
-- When making a non-trivial design/architecture choice, state the reasoning in a code comment or the commit message as well, so the "why" survives outside the chat.
-- Never invent APIs, library functions, or config options — verify they exist (via docs, the codebase, or installed package version) before using them.
-- **Protect agent configuration.** Don't modify `AGENTS.md`, `CLAUDE.md`, or other agent/assistant configuration (rules, skills, hooks) unless explicitly asked to.
+If the request is straightforward and the change is clearly local, skip a formal plan and proceed.
 
-### Communication
+### Phase 3 — Implement
 
-- **Language.** Reply in the language of the user's message; file names, commands, and technical terms keep their original form.
-- **Concision.** Be concise. For a multi-step task, give short progress notes at key moments: exploration, decision, difficulty, validation. Don't describe every read or command that has no consequence.
-- **Uncertainty.** Flag any uncertainty that could change the scope or the outcome.
-- **Final reply.** Start with the result, then the files modified, the validations actually run (command and result), and the remaining limitations.
-- **Honesty about checks.** Never present a check that wasn't run as passed. Distinguish four things: automated checks the agent actually executed, UI/manual checks the agent itself observed (only possible with real browser/UI tooling), UI/manual checks the agent asked the user to run, and checks that are only recommended but not yet done. A check the agent merely *asked* the user to try is "requested", not "passed", until they answer — don't upgrade it on their behalf. If a check fails and then passes, report both results.
+1. Make the smallest change that fully satisfies the request.
+2. Reuse existing utilities, patterns, components, helpers, and dependencies where appropriate.
+3. Preserve unrelated behavior and public interfaces unless the task requires changing them.
+4. Keep domain/business logic in the layer where the project expects it to live.
+5. Do not introduce speculative features, abstractions, configurability, or refactors for future use.
+6. Keep changes readable and consistent with nearby code.
 
----
+If implementation reveals a significant requirement that was not understood during planning, stop and reassess before expanding scope.
 
-## 8. Hooks (optional)
+### Phase 4 — Validate
 
-- If this project has an agent hook configured (for Claude Code: `.claude/settings.json` plus a script, typically under `.claude/hooks/`; other tools use their own equivalent), read that hook's own README/comments for the event it fires on, what it actually checks, and its retry/loop-guard behavior before assuming what it does or claiming it ran.
-- A hook that reruns tests only confirms the tests it targets. Never extend a hook's "pass" into a claim that the whole application works (section 7's verify-manually rule still applies on top of it).
-- A hook's failure or block is a real signal, not an obstacle to route around — fix the reported problem; don't disable, edit around, or silence a hook to get past it without asking first (same principle as section 4: never ignore a failing check silently).
-- Hooks are tool-specific: the event name and return format differ by tool, and a hook working in one tool doesn't imply it's wired up in another. If the project moves tools, re-verify the hook actually fires (both a passing and a failing case) rather than assuming the config ported over — running the hook's script by hand does not prove it's wired to the event.
-- This kit ships one ready-made example: `hooks/pre-turn-test-check/`, which reruns a configured test command before the agent's turn ends and reports precisely *why* it isn't passing (not implemented / dependency error / code error / real test failure) instead of ever turning a failure into a false success. See its own README for wiring instructions and known activation conditions per tool.
+Validation is part of implementation, not an optional final step.
+
+Run checks in roughly this order:
+
+1. targeted test/check for the changed behavior
+2. targeted lint/type/static checks
+3. broader relevant test suite
+4. broader lint/type/build checks when appropriate
+5. manual/UI verification when automation cannot prove the behavior
+
+Fix failures rather than bypassing them.
+
+### Phase 5 — Review
+
+Before declaring the task complete:
+
+1. Inspect the final diff.
+2. Check for accidental changes.
+3. Check for debug output, temporary files, generated artifacts, unused imports, dead code, and stale comments.
+4. Search for affected call sites and consumers that may have been missed.
+5. Confirm documentation/interfaces remain consistent.
+6. Confirm only intended files changed.
+7. Re-run the narrowest important verification after the final edit if the previous verification may have been invalidated.
+
+### Phase 6 — Report
+
+The final response must distinguish what was actually verified from what was merely recommended or requested from the user.
+
+Report:
+
+- what changed
+- why the approach was chosen when non-obvious
+- tests/checks actually run and their results
+- manual checks performed or still required
+- known limitations, assumptions, or follow-up items
+
+Never say "everything works" unless the available evidence supports that claim.
 
 ---
 
-## 9. Project-Specific Overrides
+## 5. Coding Norms
 
-> Add anything below that overrides or extends the general rules above for this specific project (e.g. a stricter style guide, a monorepo's cross-package rules, a required commit template, deployment steps, etc.)
+- **Simplicity first.** Prefer the simplest solution that is correct and maintainable.
+- **Match existing style.** Follow established naming, file organization, error handling, and architectural patterns.
+- **Single responsibility.** Keep functions/classes/modules focused enough to understand and test.
+- **Separate concerns.** Keep business/domain logic, application orchestration, infrastructure, and presentation concerns separated according to the project's architecture.
+- **Meaningful names.** Names should describe what something is or does.
+- **No dead code.** Remove unused imports, unused variables, abandoned experiments, and commented-out code unless a project convention explicitly requires otherwise.
+- **DRY with judgment.** Extract duplication when it creates a real maintenance problem; do not create abstractions for trivial repetition.
+- **Comments explain why.** Prefer code that explains what it does; reserve comments for intent, constraints, trade-offs, or non-obvious behavior.
+- **No premature optimization.** Optimize based on measured or clearly established requirements.
+- **Use the configured formatter/linter.** Do not hand-format against project tooling.
+- **Follow idiomatic language conventions.** Project configuration and established code take precedence over generic style preferences.
+- **Document public APIs appropriately.** Follow the project's convention for public/exported functions, classes, modules, and interfaces.
+- **Keep scope tight.** A feature request is not permission for an unrelated cleanup or refactor.
 
--
+### Preferred vs. avoided patterns
+
+When a project has a strong local convention, document concrete examples here instead of relying on vague rules.
+
+```text
+Preferred: [PROJECT-SPECIFIC EXAMPLE]
+Avoid:    [PROJECT-SPECIFIC EXAMPLE]
+Reason:   [WHY THE DIFFERENCE MATTERS]
+```
+
+---
+
+## 6. Error Handling & Validation
+
+- Validate untrusted or external data at system boundaries.
+- Handle null/missing/invalid values deliberately.
+- Consider empty collections, boundary values, malformed input, network/I/O failures, timeouts, concurrency, authorization, and partial failures where relevant.
+- Catch specific errors where practical. Do not swallow unexpected errors.
+- Preserve useful error context.
+- Use meaningful user-facing or caller-facing error messages.
+- Do not create broad error handling that hides real defects.
+- Do not silently invent behavior for ambiguous requirements.
+
+---
+
+## 7. Testing Standards
+
+- Test behavior and requirements, not internal implementation details.
+- New behavior should normally include a happy path and meaningful failure/edge cases.
+- Bug fixes should include a regression test when practical.
+- Expected values should come from the requirement/specification or independently calculated expectations, not from the implementation under test.
+- Do not delete, weaken, skip, or disable a test solely because it exposes a defect.
+- Follow repository coverage requirements when they exist. Otherwise, prefer meaningful coverage over arbitrary percentages.
+- Prefer targeted tests first, then the broader relevant suite.
+- For changes with no automated test coverage, provide a clear manual verification procedure and report that automation did not cover the behavior.
+
+### Test-data rule
+
+Do not modify fixtures, snapshots, mocks, or expected outputs just to make a new implementation pass. First determine whether the implementation or expectation is wrong.
+
+### UI rule
+
+Automated unit/integration tests do not prove that real browser interactions, focus, mouse/keyboard behavior, layout, or visual output work correctly. Use real UI/browser tooling when available; otherwise report manual verification as a separate requirement.
+
+---
+
+## 8. Dependencies & Configuration
+
+- Reuse an existing dependency before adding a new one when it can reasonably solve the problem.
+- Before adding a dependency, verify that it exists, is compatible with the project version, and is appropriate for the problem.
+- Do not add a dependency only for a trivial helper that the project can reasonably implement itself.
+- Avoid changing dependency versions unless the task requires it.
+- Treat lockfiles as important project state; update them using the project's package manager rather than editing them manually.
+- Do not modify generated files manually when they are produced by a documented generator.
+- Do not change build, CI, deployment, or environment configuration without understanding its consumers.
+- When a configuration change is necessary, verify both the changed path and its downstream effects.
+
+---
+
+## 9. Git & Change Management
+
+Follow the repository's existing Git workflow when one exists.
+
+If no workflow is documented:
+
+- avoid working directly on protected branches for non-trivial changes
+- use a focused feature/fix branch where appropriate
+- keep commits logically scoped if commits are requested
+- use clear imperative commit messages
+- do not commit secrets or machine-specific data
+
+### Protected operations
+
+Do not perform destructive or history-rewriting operations without explicit authorization when they could discard work or affect shared history. This includes, as applicable:
+
+- force-pushes
+- deleting branches
+- resetting/discarding uncommitted user changes
+- rewriting shared history
+- deleting large sets of files
+- destructive database operations
+- broad automated replacements outside the requested scope
+
+Before pushing or opening a PR, verify the working tree and final diff.
+
+---
+
+## 10. Security & Privacy
+
+- Treat external/user-provided data as untrusted.
+- Never hardcode secrets, passwords, tokens, private keys, or credentials.
+- Never expose secrets through source code, logs, screenshots, tests, error messages, commits, or generated artifacts.
+- Redact sensitive values during debugging.
+- Do not weaken authentication, authorization, encryption, validation, or security controls merely to simplify implementation or testing.
+- Prefer least privilege for permissions, service accounts, filesystem access, database access, and API scopes.
+- Avoid insecure defaults when a secure alternative is practical.
+- Review generated code and new dependencies rather than assuming they are safe.
+- Do not place machine-specific absolute paths, personal usernames, internal hostnames, or local-only configuration into tracked project files unless required by the project.
+
+---
+
+## 11. Documentation & Source of Truth
+
+`README.md` is generally for human-facing onboarding. `AGENTS.md` should contain the additional agent-facing context, constraints, and workflows that are useful during coding.
+
+Prefer references to authoritative repository documents over duplicating large explanations.
+
+When changing a public contract or important workflow, update the relevant documentation in the same change, including as applicable:
+
+- API documentation
+- CLI usage
+- configuration documentation
+- examples
+- schemas/types
+- architecture decisions
+- user-facing setup instructions
+
+When documentation and implementation disagree, identify which is authoritative before changing either.
+
+### Durable learnings
+
+When a task reveals a durable project rule, repeated failure mode, non-obvious architectural constraint, or required command, consider updating the appropriate project documentation or `AGENTS.md` so future agents do not rediscover it. Do not record temporary session details that will quickly become obsolete.
+
+---
+
+## 12. Hooks, CI & Automation
+
+- Inspect relevant hooks, CI workflows, code generators, and automation before relying on them.
+- A passing hook only proves the checks that hook actually ran.
+- A passing unit-test suite does not prove the entire application works.
+- Treat automation failures as real signals; fix the underlying problem rather than bypassing the automation.
+- If automation changes files, inspect those changes before finishing.
+- Do not claim CI passed unless you actually observed the result.
+
+---
+
+## 13. Stop Conditions & Escalation
+
+The agent should stop editing and reassess when any of these occur:
+
+- The task's requirements are materially ambiguous.
+- The implementation would require a major architectural change not implied by the request.
+- A required dependency or API cannot be verified.
+- Existing tests and documented behavior disagree in a way that affects the requested change.
+- A destructive operation appears necessary but is not clearly authorized.
+- A security-sensitive behavior is being changed without sufficient context.
+- The current approach is expanding substantially beyond the original scope.
+- The agent has lost confidence in which behavior is correct.
+
+When stopping, explain the specific uncertainty or conflict and the smallest decision needed to proceed.
+
+---
+
+## 14. Project-Specific Overrides
+
+Replace this section with the project's concrete rules. Prefer rules that are specific, actionable, and not already guaranteed by tooling.
+
+- **Domain source(s) of truth:** `[PROJECT-SPECIFIC]`
+- **Architecture rules:** `[PROJECT-SPECIFIC]`
+- **Required libraries/patterns:** `[PROJECT-SPECIFIC]`
+- **Forbidden libraries/patterns:** `[PROJECT-SPECIFIC]`
+- **Required tests/coverage:** `[PROJECT-SPECIFIC]`
+- **Required quality gates:** `[PROJECT-SPECIFIC]`
+- **Protected/generated files:** `[PROJECT-SPECIFIC]`
+- **Required documentation:** `[PROJECT-SPECIFIC]`
+- **Deployment/release requirements:** `[PROJECT-SPECIFIC]`
+- **Definition of done:** `[PROJECT-SPECIFIC]`
+
+### Project-specific examples
+
+Use short examples when a rule is easy to misunderstand:
+
+```text
+Good: [PROJECT-SPECIFIC EXAMPLE]
+Bad:  [PROJECT-SPECIFIC EXAMPLE]
+Why:  [REASON]
+```
+
+Do not repeat generic rules from this file unless the project intentionally tightens them.
+
+---
+
+## 15. Communication
+
+- Reply in the language of the user's request unless the project specifies another language.
+- Be concise, but include the information necessary to review decisions and verification.
+- For longer tasks, provide brief updates at meaningful milestones rather than narrating every command.
+- Surface assumptions when they could affect the outcome.
+- Distinguish clearly between **verified**, **requested manual verification**, and **not checked**.
+- Never represent a recommendation as a completed check.
+
+### Final-response format
+
+Unless the user requests another format, finish coding tasks with:
+
+**Result:** what changed.
+
+**Files:** which files changed.
+
+**Verification:** exact checks run and whether they passed or failed.
+
+**Manual checks:** anything the user still needs to verify.
+
+**Notes:** important assumptions, limitations, or follow-up items.
+
+---
+
+## 16. Definition of Done
+
+Unless this project defines a stricter standard, a task is complete only when:
+
+1. The requested behavior is implemented.
+2. The implementation is limited to the requested scope.
+3. Relevant tests were added or updated when appropriate.
+4. Relevant automated checks were actually run and the result is known.
+5. Relevant lint/type/build checks were run when applicable.
+6. Public interfaces and documentation were updated when necessary.
+7. No secrets or machine-specific data were introduced.
+8. The final diff was reviewed.
+9. No temporary/debug artifacts remain.
+10. Remaining manual verification, uncertainty, or limitations are explicitly reported.
+
+Do not equate “tests passed” with “the whole application works” when the tests do not cover the behavior in question.

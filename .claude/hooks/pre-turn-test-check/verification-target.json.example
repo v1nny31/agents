@@ -1,0 +1,34 @@
+{
+  "//": "Optional. Copy to .claude/hooks/verification-target.json when this project needs explicit verification.",
+  "enabled": true,
+
+  "//verification": "Run these checks on every normal Stop event.",
+  "checks": [
+    {
+      "name": "tests",
+      "command": "npm test",
+      "workingDirectory": "."
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "workingDirectory": "."
+    },
+    {
+      "name": "build",
+      "command": "npm run build",
+      "workingDirectory": "."
+    }
+  ],
+
+  "//setup": "Optional project-specific setup. Examples: docker compose up -d db, make test-env, ./scripts/test-setup.sh",
+  "setupCommand": null,
+  "setupOnce": true,
+
+  "//behavior": "By default, missing tests/verification do NOT fail a fresh project. Set requireVerification=true once the project has a real verification target.",
+  "autoDetect": true,
+  "requireVerification": false,
+
+  "maxAttempts": 2,
+  "timeoutMs": 120000
+}
