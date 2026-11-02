@@ -46,7 +46,7 @@ cp test-target.json.example test-target.json
 or override per-run with an environment variable instead:
 
 ```bash
-CLAUDE_HOOK_TEST_CMD="npm test -- path/to/file.test.js" node hooks/pre-turn-test-check/check-tests.mjs
+CLAUDE_HOOK_TEST_CMD="npm test -- path/to/file.test.js" node .agents/hooks/pre-turn-test-check/check-tests.mjs
 ```
 
 A Node script that invokes Vitest (or another runner) equivalently is
@@ -68,7 +68,7 @@ again. To keep this bounded:
   on stdin (true = this is already a continuation caused by a previous
   block).
 - It also keeps its own per-session attempt counter under
-  `hooks/pre-turn-test-check/.state/`, capped by `CLAUDE_HOOK_MAX_ATTEMPTS`
+  `.agents/hooks/pre-turn-test-check/.state/`, capped by `CLAUDE_HOOK_MAX_ATTEMPTS`
   (default **2** real attempts — so a fix attempt actually gets
   re-checked once before the hook gives up).
 - Once the cap is reached it **allows** the stop instead of blocking

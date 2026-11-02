@@ -19,16 +19,16 @@ This file gives any AI coding agent (Claude Code, Codex, Cursor, Copilot, Gemini
 
 > [PROJECT-SPECIFIC — fill in per project]
 
-| Task | Command |
-|---|---|
-| Install deps | |
-| Run dev server | |
-| Run tests | |
-| Run a single test | |
-| Lint | |
-| Format | |
-| Build | |
-| Type-check | |
+| Task              | Command |
+| ----------------- | ------- |
+| Install deps      |         |
+| Run dev server    |         |
+| Run tests         |         |
+| Run a single test |         |
+| Lint              |         |
+| Format            |         |
+| Build             |         |
+| Type-check        |         |
 
 The agent should always use the project's actual scripts (e.g. from `package.json`, `Makefile`, `pyproject.toml`) rather than guessing generic commands.
 
@@ -53,7 +53,6 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 - **Consistent formatting.** Run the project's formatter/linter before considering work done — don't hand-format.
 - **Respect the correct checkstyle for the language being used.** This includes, at minimum:
   - Correct, consistent indentation and bracing style for that language (e.g. 4 spaces for Python/PEP8, 2 spaces for JS/TS per the project's config, gofmt/rustfmt output for Go/Rust, etc.) — use the language/project's standard formatter rather than a personal default.
-  - A doc comment/docstring for every function, method, and class (or at minimum every public/exported one) — describing purpose, parameters, return value, and any exceptions/errors raised.
   - Following the language's idiomatic naming conventions (e.g. `snake_case` in Python, `camelCase` in JS/Java, `PascalCase` for classes/types).
   - Conforming to the established style guide for that language/ecosystem (PEP8 for Python, Airbnb/Standard/ESLint config for JS/TS, `gofmt`/`golint` for Go, `rustfmt`/`clippy` for Rust, etc.), or the project's own linter config if one exists and takes precedence.
 
@@ -84,13 +83,10 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 
 ## 5. Testing
 
-- The agent adds tests when explicitly asked to. When it does, or when it writes tests as part of a feature/fix, they must cover at least **90% coverage** of the code they target (line/branch coverage per the project's test-coverage tool). If the project already has a coverage tool/config, use it and report the resulting number; otherwise state clearly that coverage wasn't measured and why.
-- New features get at least a basic test covering the happy path and one failure/edge case, in addition to meeting the 90% coverage bar above.
 - Bug fixes should include a test that reproduces the bug before the fix, when practical.
 - Don't delete, weaken, or disable a test, and don't alter test data, just to make it pass — fix the underlying code, or explain clearly why the test's expectation was wrong.
 - **Write tests from the requirements, not from the implementation.** Compute expected values independently from the spec/domain rules; never derive them by running the function under test and pasting its output back as the expectation.
 - **Validate narrow first, then wide.** Run the targeted test (single file or test name) before the full suite; then run the full test suite plus lint/type checks.
-- If hitting 90% coverage isn't realistic for a given piece of code (e.g. trivial getters, unreachable defensive branches), say so explicitly rather than silently falling short or padding with low-value tests just to hit the number.
 
 ---
 
@@ -127,7 +123,7 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
   - If the agent has real browser/UI tooling, exercise the change itself — mouse/keyboard interaction, focus, messages, state after a reload — and report exactly what it did and observed.
   - If it doesn't, it does not get to claim the UI works. Instead, write the user a short, precise manual test script (exact steps, exact expected result) and explicitly ask them to run it and report back. The task isn't "done" until that confirmation comes back — don't say "everything works" on the user's behalf.
   - Match the verification steps to what's actually being checked, not a generic default. In particular, a full reload can itself hide or fix the very thing being checked (e.g. state that should survive without a reload) — reload when the scenario calls for it, and deliberately don't when the behavior being verified depends on not reloading.
-- **Explain every decision and the reasoning behind it** — not just non-obvious changes. When presenting work, walk through: what was changed, why this approach was chosen over alternatives, what trade-offs it carries, and any assumptions made along the way. Don't just say "done" or hand over a diff with no explanation, but don't narrate details that have no consequence either.
+- **Explain every decision and the reasoning behind it** — not just non-obvious changes. When presenting work, walk through: what was changed, why this approach was chosen over alternatives, what trade-offs it carries, and any assumptions made along the way. Don't just say "done" or hand over a diff with no explanation, but don't narrate details that have no consequence either. If the `i-have-adhd` plugin is active, its no-filler style wins over this rule: keep explanations to what the user must act on or know.
 - Surface trade-offs when there are multiple reasonable approaches, and explain why one was picked over the others, instead of silently choosing one and not mentioning the alternatives.
 - When making a non-trivial design/architecture choice, state the reasoning in a code comment or the commit message as well, so the "why" survives outside the chat.
 - Never invent APIs, library functions, or config options — verify they exist (via docs, the codebase, or installed package version) before using them.
@@ -149,7 +145,7 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 - A hook that reruns tests only confirms the tests it targets. Never extend a hook's "pass" into a claim that the whole application works (section 7's verify-manually rule still applies on top of it).
 - A hook's failure or block is a real signal, not an obstacle to route around — fix the reported problem; don't disable, edit around, or silence a hook to get past it without asking first (same principle as section 4: never ignore a failing check silently).
 - Hooks are tool-specific: the event name and return format differ by tool, and a hook working in one tool doesn't imply it's wired up in another. If the project moves tools, re-verify the hook actually fires (both a passing and a failing case) rather than assuming the config ported over — running the hook's script by hand does not prove it's wired to the event.
-- This kit ships one ready-made example: `hooks/pre-turn-test-check/`, which reruns a configured test command before the agent's turn ends and reports precisely *why* it isn't passing (not implemented / dependency error / code error / real test failure) instead of ever turning a failure into a false success. See its own README for wiring instructions and known activation conditions per tool.
+- This kit ships one ready-made example: `.agents/hooks/pre-turn-test-check/`, which reruns a configured test command before the agent's turn ends and reports precisely *why* it isn't passing (not implemented / dependency error / code error / real test failure) instead of ever turning a failure into a false success. See its own README for wiring instructions and known activation conditions per tool.
 
 ---
 
@@ -157,4 +153,4 @@ If a command isn't defined yet (no test suite, linter, or CI), write "none" in i
 
 > Add anything below that overrides or extends the general rules above for this specific project (e.g. a stricter style guide, a monorepo's cross-package rules, a required commit template, deployment steps, etc.)
 
--
+- If Ponytail's rules have been added to this file and disagree with a rule above, Ponytail's rule wins.

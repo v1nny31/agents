@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node hooks/pre-turn-test-check/check-tests.mjs"
+            "command": "node .agents/hooks/pre-turn-test-check/check-tests.mjs"
           }
         ]
       }
