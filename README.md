@@ -58,7 +58,11 @@ Each folder is a self-contained skill an agent can invoke:
 | `commit` | Stage, screen for secrets/temp files, and commit the working tree in small, atomic commits with short messages. Never pushes. |
 | `push` | Sync, run the project's checks, push the branch (no force), and open a PR with a structured summary. Never merges. |
 | `code-review` | Review a diff, PR, branch, or path for correctness, security, performance, error handling, API design, testing, and project-convention issues. |
+| `create-pr` | Open a fully filled PR, using the repo's own template if it has one. Needs the GitHub CLI. |
+| `create-issue` | File a fully filled issue, using the repo's own templates if it has them. Needs the GitHub CLI. |
 | `design-taste-frontend` | Design landing pages, portfolios, and redesigns that don't look templated. Third-party, from [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill). |
+| `no-ai-slop` | Edit drafts into clearer, more human writing, or detect AI-slop patterns. Third-party, from [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop). |
+| `thermo-nuclear-code-quality-review` | Run a very strict maintainability review of a branch. Only runs when invoked. Third-party, from [cursor/plugins](https://github.com/cursor/plugins). |
 
 `commit`, `push`, and `code-review` defer to `AGENTS.md` for anything project-specific (protected branches, lint/test commands, required approvals) instead of hardcoding a stack.
 
